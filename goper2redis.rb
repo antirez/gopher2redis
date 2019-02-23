@@ -41,16 +41,22 @@ def parse_options
         # --verbose is a global option
         if option == "--host" && ARGV.length >= 1
             options['host'] = ARGV.shift
+        elsif option == "--localhost" && ARGV.length >= 1
+            options['localhost'] = ARGV.shift
         elsif option == "--port" && ARGV.length >= 1
             options['port'] = ARGV.shift.to_i
-            if options['port'] == 0
-                puts ">>> Invalid port specified."
-                exit 1
-            end
+        elsif option == "--localport" && ARGV.length >= 1
+            options['localport'] = ARGV.shift.to_i
+        elsif option == "--root" && ARGV.length >= 1
+            options['root'] = ARGV.shift
         elsif option == "--help"
             puts "Usage: gopher2redis --host <host> --port <port> [options]"
             puts "--host <hostname>      Specify the target Redis ip/host"
             puts "--port <port>          Specify the target Redis TCP port"
+            puts "--root <path>          Gopher root directory."
+            puts "--localhost <hostname> Gopher hostname to generate local links."
+            puts "--localport <port>     Gopher port to generate local links."
+            puts "                       The current directory otherwise."
             puts "--write                Write keys without asking"
             puts "--help                 Show this help"
             exit 0
@@ -61,8 +67,14 @@ def parse_options
     end
 
     # Check that the user specified at least the required arguments
-    if !options['host'] || !options['port']
-        puts ">>> Please specify at least the --host and --port options."
+    if !options['host'] || !options['port'] || !options['localhost'] || \
+       !options['localport']
+        puts ">>> Please specify at least the --host and --port and "
+        puts ">>> --local options. For example:"
+        puts ">>>"
+        puts ">>> gopher2redis.rb --host redisinstance --port 6379 \\"
+        puts ">>> --localhost gopher.redis.io --localport 70"
+        puts ">>>"
         puts ">>> Use the --help option for more info."
         exit 1
     end
@@ -70,11 +82,59 @@ def parse_options
     return options
 end
 
-def dir2keys
+def dir2keys(r,key,localhost,localport)
+    content = ""
+    items = Dir.entries(".").select{|e| e[0] != "."}.sort
+    items = items.reverse if items.member?('REVERSE')
+    items.each{|i|
+        tokens = i.split("-")
+        # Single words are options / modifiers, like REVERSE or HEADER
+        # so let's skip what is not in the form PREFIX-TITLE
+        next if tokens.length <= 1
+
+        # Render this entry, both in the listing and materialize it as a key
+        # as well if it not a directory or an external link.
+        selector = tokens[1..-1].join("-")
+        title = selector.gsub("_"," ")
+        selector = "#{key}#{selector}/"
+        type = title.split(".")[1]
+        type.downcase if type
+        if File.directory?(i)
+            content << "1#{title}\t#{selector}\t#{localhost}\t#{localport}\n"
+            # Recrusive call to generate the nested directory.
+            Dir.chdir(i)
+            dir2keys(r,selector,localhost,localport)
+            Dir.chdir("..")
+        else
+            # Here we handle items that are not directories. We do
+            # different handlings according to the exntension of the
+            # file. The default is to handle such file as binary.
+            type = "" if !type
+            if ['zip','bin','gz','tgz'].member?(type)
+                type = '9'
+            elsif ['gif'].member?(type)
+                type = 'g'
+            elsif ['html','htm'].member?(type)
+                type = 'h'
+            elsif ['jpg','jpeg','png'].member?(type)
+                type = 'I'
+            else
+                # Every unknonw type default to plaintext. It's Gopher
+                # after all!
+                type = '0'
+            end
+            content << "#{type}#{title}\t#{selector}\t#{localhost}\t#{localport}\n"
+            r.set(selector,File.read(i))
+        end
+    }
+    r.set(key,content)
 end
 
 def main
     $opt = parse_options
+    Dir.chdir($opt['root']) if $opt['root']
+    r = Redis.new(:host => $opt['host'], :port => $opt['port'])
+    dir2keys(r,"/",$opt['localhost'],$opt['localport'])
 end
 
 main
