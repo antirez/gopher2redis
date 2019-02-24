@@ -31,6 +31,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'redis'
+require 'uri'
 
 # Options parsing function. Returns an hash representing
 # the options.
@@ -118,13 +119,47 @@ def dir2keys(r,key,localhost,localport)
                 type = 'h'
             elsif ['jpg','jpeg','png'].member?(type)
                 type = 'I'
+            elsif ['link'].member?(type)
+                type = 'link'
             else
                 # Every unknonw type default to plaintext. It's Gopher
                 # after all!
                 type = '0'
             end
-            content << "#{type}#{title}\t#{selector}\t#{localhost}\t#{localport}\n"
-            r.set(selector,File.read(i))
+
+            if type == 'link'
+                uri = File.read(i).strip
+                match = URI.regexp.match(uri)
+                if !match
+                    puts "Warning: #{i} link discarded, URI can't be parsed"
+                else
+                    # If there is no path, we have to assume document
+                    # type is 1 (Gopher index) and selector the empty
+                    # string.
+                    if match[7]
+                        link_type = match[7][1]
+                        link_selector = match[7][2..-1]
+                    else
+                        link_type = '1'
+                        link_selector = ""
+                    end
+
+                    # Default port is 70
+                    if match[5]
+                        link_port = match[5]
+                    else
+                        link_port = 70
+                    end
+
+                    link_host = match[4]
+                end
+                content << "#{link_type}#{title}\t#{link_selector}\t"+
+                           "#{link_host}\t#{link_port}\n"
+            else
+                content << "#{type}#{title}\t#{selector}\t"+
+                           "#{localhost}\t#{localport}\n"
+                r.set(selector,File.read(i))
+            end
         end
     }
     r.set(key,content)
