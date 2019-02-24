@@ -50,6 +50,8 @@ def parse_options
             options['localport'] = ARGV.shift.to_i
         elsif option == "--root" && ARGV.length >= 1
             options['root'] = ARGV.shift
+        elsif option == "--all"
+            options['all'] = true
         elsif option == "--help"
             puts "Usage: gopher2redis --host <host> --port <port> [options]"
             puts "--host <hostname>      Specify the target Redis ip/host"
@@ -57,6 +59,8 @@ def parse_options
             puts "--root <path>          Gopher root directory."
             puts "--localhost <hostname> Gopher hostname to generate local links."
             puts "--localport <port>     Gopher port to generate local links."
+            puts "--all                  Process all files not just the ones"
+            puts "                       starting with <prefix>-... like 0000-FOO"
             puts "                       The current directory otherwise."
             puts "--write                Write keys without asking"
             puts "--help                 Show this help"
@@ -91,11 +95,15 @@ def dir2keys(r,key,localhost,localport)
         tokens = i.split("-")
         # Single words are options / modifiers, like REVERSE or HEADER
         # so let's skip what is not in the form PREFIX-TITLE
-        next if tokens.length <= 1
+        next if tokens.length <= 1 && !$opt['all']
 
         # Render this entry, both in the listing and materialize it as a key
         # as well if it not a directory or an external link.
-        selector = tokens[1..-1].join("-")
+        if $opt['all']
+            selector = i
+        else
+            selector = tokens[1..-1].join("-")
+        end
         title = selector.gsub("_"," ")
         selector = "#{key}#{selector}/"
         type = title.split(".")[1]
