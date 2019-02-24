@@ -103,9 +103,11 @@ def dir2keys(r,key,localhost,localport)
         if File.directory?(i)
             content << "1#{title}\t#{selector}\t#{localhost}\t#{localport}\n"
             # Recrusive call to generate the nested directory.
+            puts ">>> Entering #{i}"
             Dir.chdir(i)
             dir2keys(r,selector,localhost,localport)
             Dir.chdir("..")
+            puts "<<< Back to parent directory"
         else
             # Here we handle items that are not directories. We do
             # different handlings according to the exntension of the
@@ -131,7 +133,7 @@ def dir2keys(r,key,localhost,localport)
                 uri = File.read(i).strip
                 match = URI.regexp.match(uri)
                 if !match
-                    puts "Warning: #{i} link discarded, URI can't be parsed"
+                    puts "--- #{i} link discarded, URI can't be parsed"
                 else
                     # If there is no path, we have to assume document
                     # type is 1 (Gopher index) and selector the empty
@@ -160,6 +162,7 @@ def dir2keys(r,key,localhost,localport)
                            "#{localhost}\t#{localport}\n"
                 r.set(selector,File.read(i))
             end
+            puts "+++ #{i} OK"
         end
     }
     r.set(key,content)
