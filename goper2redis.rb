@@ -173,6 +173,11 @@ def dir2keys(r,key,localhost,localport)
             puts "+++ #{i} OK"
         end
     }
+    # Finally terminate with the "Lastline" terminator .<CR><LF> according
+    # to the protocol. Note that Redis will not add that, because in practical
+    # terms to accomodate the protocol as stated in RFC1436 does more harm than
+    # good with current clients.
+    content << ".\r\n"
     r.set(key,content)
 end
 
