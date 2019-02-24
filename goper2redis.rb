@@ -121,7 +121,7 @@ def dir2keys(r,key,localhost,localport)
             # different handlings according to the exntension of the
             # file. The default is to handle such file as binary.
             type = "" if !type
-            if ['zip','bin','gz','tgz'].member?(type)
+            if ['zip','bin','gz','tgz','o'].member?(type)
                 type = '9'
             elsif ['gif'].member?(type)
                 type = 'g'
