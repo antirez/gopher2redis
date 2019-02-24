@@ -47,11 +47,16 @@ What I'll see in the final Gopher site is a listing like that:
     cat.gif
 
 Sometimes it is useful to show the content in the reverse order, for instance
-you may take a blog in your Gopher hole, and start every post with the date
-like `2019.05.02-5 Feb 2019: Programming_in_Ruby.txt`, and other files with
-similar names. In a blog it makes sense to show the last written post as first
-entry. To have such effect just create an empty file called `REVERSE` in the
-directory you want the listing to be sorted in the reverse order.
+you may take a blog in your Gopher hole (that is a **phlog** in Gopher slang),
+and start every post with the date like:
+
+    2019.02.05-5 Feb 2019: Programming_in_Ruby.txt
+    2019.02.04-4 Feb 2019: Today_strange_journey.txt
+
+and other files with similar names. In a blog it makes sense to show the last
+written post as first entry. To have such effect just create an empty file
+called `REVERSE` in the directory you want the listing to be sorted in the
+reverse order.
 
 ## File extensions
 
