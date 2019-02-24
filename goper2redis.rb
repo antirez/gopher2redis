@@ -48,6 +48,8 @@ def parse_options
             options['port'] = ARGV.shift.to_i
         elsif option == "--localport" && ARGV.length >= 1
             options['localport'] = ARGV.shift.to_i
+        elsif option == "--pass" && ARGV.length >= 1
+            options['pass'] = ARGV.shift
         elsif option == "--root" && ARGV.length >= 1
             options['root'] = ARGV.shift
         elsif option == "--all"
@@ -56,6 +58,7 @@ def parse_options
             puts "Usage: gopher2redis --host <host> --port <port> [options]"
             puts "--host <hostname>      Specify the target Redis ip/host"
             puts "--port <port>          Specify the target Redis TCP port"
+            puts "--pass <password>      Specify the Redis password to use"
             puts "--root <path>          Gopher root directory."
             puts "--localhost <hostname> Gopher hostname to generate local links."
             puts "--localport <port>     Gopher port to generate local links."
@@ -185,6 +188,7 @@ def main
     $opt = parse_options
     Dir.chdir($opt['root']) if $opt['root']
     r = Redis.new(:host => $opt['host'], :port => $opt['port'])
+    r.auth($opt['pass']) if $opt['pass']
     dir2keys(r,"/",$opt['localhost'],$opt['localport'])
 end
 
