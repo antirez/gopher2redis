@@ -109,7 +109,7 @@ def dir2keys(r,key,localhost,localport)
         type = title.split(".")[1]
         type.downcase if type
         if File.directory?(i)
-            content << "1#{title}\t#{selector}\t#{localhost}\t#{localport}\n"
+            content << "1#{title}\t#{selector}\t#{localhost}\t#{localport}\r\n"
             # Recrusive call to generate the nested directory.
             puts ">>> Entering #{i}"
             Dir.chdir(i)
@@ -164,10 +164,10 @@ def dir2keys(r,key,localhost,localport)
                     link_host = match[4]
                 end
                 content << "#{link_type}#{title}\t#{link_selector}\t"+
-                           "#{link_host}\t#{link_port}\n"
+                           "#{link_host}\t#{link_port}\r\n"
             else
                 content << "#{type}#{title}\t#{selector}\t"+
-                           "#{localhost}\t#{localport}\n"
+                           "#{localhost}\t#{localport}\r\n"
                 r.set(selector,File.read(i))
             end
             puts "+++ #{i} OK"
