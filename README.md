@@ -105,14 +105,14 @@ The basic usage is the following:
                      --root /Users/Alice/mygopherhole \
                      --localhost gopher.alicesite.net --localport 70
 
-The --host and --port options are telling the program how to connect to
+The `--host` and `--port` options are telling the program how to connect to
 Redis in order to change its content (WARNING: don't write to the wrong
 Redis server for an error).
 
-The --root option is used in order to specify which directory (and nested
+The `--root` option is used in order to specify which directory (and nested
 directories) you want to turn into a Gopher site into Redis.
 
-Finally the --localhost and --localport options are used to tell the
+Finally the `--localhost` and `--localport` options are used to tell the
 utility in which host and port the public Redis Gopher service will run, so that
 the utility can generate the Gopher references in the listings to point to
 the right hostname and port.
@@ -122,6 +122,23 @@ specify that. To test this program locally just use `localhost`.
 
 For other options please use the `--help` switch.
 
+## Example of directory structure to render as a Gopher site
+
+In order to give you an initial toy Gopher Hole to start with, this
+repository contains an `example-gopherhole` directory that contains a few
+files that will render in a site you can display with a Gopher client.
+
+You can explore the directory to check how it is assembled, later if you
+want to render the site into your local Redis instance, and try it with
+`lynx` as the Gopher client, do the following steps:
+
+* Start a Redis instance, latest `unstable` branch (or any Redis version 6 if already released -- at the time of writing it's alpha code), with the `--gopher-enabled yes` option in the command line, or with the same option inside `redis.conf`.
+* Translate the example Gopher hole directory into the Redis dataset using the gopher2redis.rb script: `./goper2redis.rb --host 127.0.0.1 --port 6379 --root ./example-gopherhole --localhost localhost --localport 6379`
+* See the result with `lynx gopher://localhost:6379`
+
+Note that this time we are using port 6379 which is not the default Gopher port.
+If you want to use the default port, that is 70, run Redis using such port (but you have to run it as a root user, or with alternative methods to give the process access to the lower TCP ports), and change the above command line as needed. If you plan to run such setup in production, make sure to read the next section about securing your environment.
+
 ## Configuring and securing Redis
 
 Warning: even if in Gopher mode, Redis will continue to serve normal commands:
@@ -129,6 +146,6 @@ make sure to set a password using the `requirepass` option. Also make sure
 to set the `gopher-enabled` option to yes in the Redis configuration, otherwise
 the server will not talk the Gopher protocol.
 
-Once you set a password in your Redis instance, you can use the --pass
+Once you set a password in your Redis instance, you can use the `--pass`
 gopher2redis option in order to write the new site content using the
 Redis clients authentication.
