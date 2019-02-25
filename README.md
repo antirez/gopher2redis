@@ -92,7 +92,7 @@ And so forth. If you specify a given resource in another Gopher server, make
 sure that the path includes the resource type, like the `/0/` part in the
 URI above.
 
-## Nexted directories
+## Nested directories
 
 Of course you can create all the nested directories you want: they'll be
 processed recursively, and create other nested menu items.
