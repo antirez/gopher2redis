@@ -69,6 +69,8 @@ so forth. So far the following maps are defined:
 * jpg, jpeg, png: Image file
 * html, htm: HTML file
 * link: Gopher link file (see later)
+* info: Some text that will be put inline into the listing as "info" fields
+* i: Same as .info but the filename itself is rendered as "info" field
 * All the other extensions, such as txt, c: plain text files
 
 So by default everything is a text file if not expressely specified by
