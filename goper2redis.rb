@@ -90,6 +90,63 @@ def parse_options
     return options
 end
 
+# Turn a file into a line in the Gopher listing and return the string.
+# At the same time, as a side effect, writes the key that will represent
+# such file on Redis.
+def file2keys(r,selector,title,filename,type,localhost,localport)
+    type = "" if !type
+    if ['zip','bin','gz','tgz','o'].member?(type)
+        type = '9'
+    elsif ['gif'].member?(type)
+        type = 'g'
+    elsif ['html','htm'].member?(type)
+        type = 'h'
+    elsif ['jpg','jpeg','png'].member?(type)
+        type = 'I'
+    elsif ['link'].member?(type)
+        type = 'link'
+    else
+        # Every unknonw type default to plaintext. It's Gopher
+        # after all!
+        type = '0'
+    end
+
+    if type == 'link'
+        uri = File.read(filename).strip
+        match = URI.regexp.match(uri)
+        if !match
+            puts "--- #{filename} link discarded, URI can't be parsed"
+        else
+            # If there is no path, we have to assume document
+            # type is 1 (Gopher index) and selector the empty
+            # string.
+            if match[7]
+                link_type = match[7][1]
+                link_selector = match[7][2..-1]
+            else
+                link_type = '1'
+                link_selector = ""
+            end
+
+            # Default port is 70
+            if match[5]
+                link_port = match[5]
+            else
+                link_port = 70
+            end
+
+            link_host = match[4]
+        end
+        "#{link_type}#{title}\t#{link_selector}\t#{link_host}\t#{link_port}\r\n"
+    else
+        r.set(selector,File.read(filename))
+        "#{type}#{title}\t#{selector}\t#{localhost}\t#{localport}\r\n"
+    end
+end
+
+# Turn a directory, and recursively all the subdirectories, into a Gopher
+# listing, materializing such listing and the files they contain, into the
+# Redis key space for serving via the Gopher protocol.
 def dir2keys(r,key,localhost,localport)
     content = ""
     items = Dir.entries(".").select{|e| e[0] != "."}.sort
@@ -123,56 +180,7 @@ def dir2keys(r,key,localhost,localport)
             # Here we handle items that are not directories. We do
             # different handlings according to the exntension of the
             # file. The default is to handle such file as binary.
-            type = "" if !type
-            if ['zip','bin','gz','tgz','o'].member?(type)
-                type = '9'
-            elsif ['gif'].member?(type)
-                type = 'g'
-            elsif ['html','htm'].member?(type)
-                type = 'h'
-            elsif ['jpg','jpeg','png'].member?(type)
-                type = 'I'
-            elsif ['link'].member?(type)
-                type = 'link'
-            else
-                # Every unknonw type default to plaintext. It's Gopher
-                # after all!
-                type = '0'
-            end
-
-            if type == 'link'
-                uri = File.read(i).strip
-                match = URI.regexp.match(uri)
-                if !match
-                    puts "--- #{i} link discarded, URI can't be parsed"
-                else
-                    # If there is no path, we have to assume document
-                    # type is 1 (Gopher index) and selector the empty
-                    # string.
-                    if match[7]
-                        link_type = match[7][1]
-                        link_selector = match[7][2..-1]
-                    else
-                        link_type = '1'
-                        link_selector = ""
-                    end
-
-                    # Default port is 70
-                    if match[5]
-                        link_port = match[5]
-                    else
-                        link_port = 70
-                    end
-
-                    link_host = match[4]
-                end
-                content << "#{link_type}#{title}\t#{link_selector}\t"+
-                           "#{link_host}\t#{link_port}\r\n"
-            else
-                content << "#{type}#{title}\t#{selector}\t"+
-                           "#{localhost}\t#{localport}\r\n"
-                r.set(selector,File.read(i))
-            end
+            content << file2keys(r,selector,title,i,type,localhost,localport)
             puts "+++ #{i} OK"
         end
     }
