@@ -103,6 +103,10 @@ def file2keys(r,selector,title,filename,type,localhost,localport)
         type = 'h'
     elsif ['jpg','jpeg','png'].member?(type)
         type = 'I'
+    elsif ['info'].member?(type)
+        type = 'ifile'
+    elsif ['i'].member?(type)
+        type = 'i'
     elsif ['link'].member?(type)
         type = 'link'
     else
@@ -138,6 +142,13 @@ def file2keys(r,selector,title,filename,type,localhost,localport)
             link_host = match[4]
         end
         "#{link_type}#{title}\t#{link_selector}\t#{link_host}\t#{link_port}\r\n"
+    elsif type == 'ifile'
+        lines = File.readlines(filename).map {|l|
+            "i#{l.rstrip()}\t#{selector}\t#{localhost}\t#{localport}\r\n"
+        }.join("")
+    elsif type == 'i'
+        title = title.split(".")[0..-2].join(".")
+        "i#{title}\t#{selector}\t#{localhost}\t#{localport}\r\n"
     else
         r.set(selector,File.read(filename))
         "#{type}#{title}\t#{selector}\t#{localhost}\t#{localport}\r\n"
