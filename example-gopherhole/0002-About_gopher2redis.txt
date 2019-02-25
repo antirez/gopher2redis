@@ -1,0 +1,6 @@
+Gopher2redis is a Ruby script that converts a directory and its subdirectories,
+with the text, gif, and binary files it contains, into a Redis key structure
+that can be served via the Redis Gopher implementation.
+
+More info at http://github.com/antirez/gopher2redis
+
