@@ -8,7 +8,7 @@ here [in the antirez's blog post](http://antirez.com/news/127).
 
 For the documentation about the Redis Gopher implementation please
 check the Redis official doc, specifically the
-[Gopher protocol](https://redis.io/topcis/gopher) page.
+[Gopher protocol](https://redis.io/topics/gopher) page.
 
 However the raw Redis implementation is just able to serve Redis keys using
 the Gopher protocol. If you want to create your own "Gopher hole", that is
