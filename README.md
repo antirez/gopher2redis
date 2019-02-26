@@ -1,4 +1,4 @@
-What is Goper2Redis?
+What is Gopher2Redis?
 ===
 
 Redis recently introduced support to talk the Gopher protocol. Yes, that
@@ -102,9 +102,9 @@ processed recursively and create other nested menu items.
 
 Typical usage is like so:
 
-    ./goper2redis.rb --host 127.0.0.1 --port 70 \
-                     --root /Users/Alice/mygopherhole \
-                     --localhost gopher.alicesite.net --localport 70
+    ./gopher2redis.rb --host 127.0.0.1 --port 70 \
+                      --root /Users/Alice/mygopherhole \
+                      --localhost gopher.alicesite.net --localport 70
 
 The `--host` and `--port` options tell the program how to connect to
 Redis in order to change its content (WARNING: don't write to the wrong
@@ -132,7 +132,7 @@ want to render the site into your local Redis instance and view it with
 `lynx` as the Gopher client:
 
 * Start a Redis instance, latest `unstable` branch (or any Redis version 6 if already released -- at the time of writing it's alpha code), with the `--gopher-enabled yes` option in the command line, or with the same option inside `redis.conf`.
-* Translate the example Gopher hole directory into the Redis dataset using the gopher2redis.rb script: `./goper2redis.rb --host 127.0.0.1 --port 6379 --root ./example-gopherhole --localhost localhost --localport 6379`
+* Translate the example Gopher hole directory into the Redis dataset using the gopher2redis.rb script: `./gopher2redis.rb --host 127.0.0.1 --port 6379 --root ./example-gopherhole --localhost localhost --localport 6379`
 * See the result with `lynx gopher://localhost:6379`
 
 Note that this time we are using port 6379 which is not the default Gopher port.
