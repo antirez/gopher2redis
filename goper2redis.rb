@@ -56,7 +56,7 @@ def parse_options
             options['all'] = true
         elsif option == "--help"
             puts "Usage: gopher2redis --host <host> --port <port> [options]"
-            puts "--host <hostname>      Specify the target Redis ip/host"
+            puts "--host <hostname>      Specify the target Redis IP/host"
             puts "--port <port>          Specify the target Redis TCP port"
             puts "--pass <password>      Specify the Redis password to use"
             puts "--root <path>          Gopher root directory."
@@ -110,7 +110,7 @@ def file2keys(r,selector,title,filename,type,localhost,localport)
     elsif ['link'].member?(type)
         type = 'link'
     else
-        # Every unknonw type default to plaintext. It's Gopher
+        # Every unknown type defaults to plaintext. It's Gopher
         # after all!
         type = '0'
     end
@@ -169,7 +169,7 @@ def dir2keys(r,key,localhost,localport)
         next if tokens.length <= 1 && !$opt['all']
 
         # Render this entry, both in the listing and materialize it as a key
-        # as well if it not a directory or an external link.
+        # as well if it's not a directory or an external link.
         if $opt['all']
             selector = i
         else
@@ -181,7 +181,7 @@ def dir2keys(r,key,localhost,localport)
         type.downcase if type
         if File.directory?(i)
             content << "1#{title}\t#{selector}\t#{localhost}\t#{localport}\r\n"
-            # Recrusive call to generate the nested directory.
+            # Recursive call to generate the nested directory.
             puts ">>> Entering #{i}"
             Dir.chdir(i)
             dir2keys(r,selector,localhost,localport)
@@ -189,7 +189,7 @@ def dir2keys(r,key,localhost,localport)
             puts "<<< Back to parent directory"
         else
             # Here we handle items that are not directories. We do
-            # different handlings according to the exntension of the
+            # different handlings according to the extension of the
             # file. The default is to handle such file as binary.
             content << file2keys(r,selector,title,i,type,localhost,localport)
             puts "+++ #{i} OK"
@@ -197,7 +197,7 @@ def dir2keys(r,key,localhost,localport)
     }
     # Finally terminate with the "Lastline" terminator .<CR><LF> according
     # to the protocol. Note that Redis will not add that, because in practical
-    # terms to accomodate the protocol as stated in RFC1436 does more harm than
+    # terms to accommodate the protocol as stated in RFC1436 does more harm than
     # good with current clients.
     content << ".\r\n"
     r.set(key,content)
